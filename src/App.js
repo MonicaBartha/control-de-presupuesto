@@ -1,13 +1,75 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Pregunta from './components/Pregunta';
+import Formulario from './components/Formulario';
+import Listado from './components/Listado';
+import ControlPresupuesto from './components/ControlPresupuesto';
 
 function App() {
+  // definir el state del presupuesto y del restante
+  const [ presupuesto, guardarPresupuesto ] = useState(0);
+  const [ restante, guardarRestante ] = useState(0);
+  // state de carga condicional de componente - Formulario
+  const [ mostrarpregunta, actualizarPregunta ] = useState(true);
+  // state del listado de gastos
+  const [ gastos, guardarGastos ] = useState([]);
+  const [ gasto, guardarGasto ] = useState({});
+  const [ creargasto, guardarCrearGasto ] = useState(false);
+
+  // useEffect que actualiza el restante
+  useEffect(() => {
+    // si crearGasto es true ejecuta el codigo de abajo
+   if(creargasto) {
+     // agrega el nuevo presupuesto
+    guardarGastos([
+      ...gastos,
+      gasto
+    ]);
+
+    // resta del presupuesto actual
+    const presupuestoRestante = restante - gasto.cantidad;
+    guardarRestante(presupuestoRestante);
+
+    // desupes de que se ejecute, hay que resetear el gasto a false
+    guardarCrearGasto(false);
+   }
+  }, [gasto, creargasto, gastos, restante]);
+
+
   return (
     <div className="container">
       <header>
         <h1>Gasto semanal</h1>
         <div className="contenido-principal contenido">
-            <Pregunta />
+          {/* Carga condicional de componentes */}
+            {/* si mostrarpregunta es true se ejecuta <Pregunta /> */}
+            { mostrarpregunta ? (
+                <Pregunta
+                guardarPresupuesto={guardarPresupuesto}
+                guardarRestante={guardarRestante}
+                actualizarPregunta={actualizarPregunta}
+                />
+            )  :  (
+                <div className="row">
+                    <div className="one-half column">
+                      <Formulario 
+                      guardarGasto={guardarGasto}
+                      guardarCrearGasto={guardarCrearGasto}
+                      />
+                    </div>
+                    <div className="one-half column">
+                      <Listado
+                      gastos={gastos}
+                      />
+                      <ControlPresupuesto
+                        presupuesto={presupuesto}
+                        restante={restante}
+                      />
+                    </div>
+                </div>
+            )
+            }
+            
+            
         </div>
         
       </header>
